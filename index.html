@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+    <style>
+        .add,.remove{ cursor:pointer; font-size:12px; color:#f00;}
+        li{ padding-bottom:10px;}
+        .main{ position:absolute; width:250px; right:0; top:0; background:#ccc;}
+        .main li{ list-style-type:lower-alpha;}
+    </style>
+    <script src="jquery.1.9.1.min.js"></script>
+</head>
+
+<body>
+<ul>
+    <li>
+        <span>苹果手机</span>
+        <span class="add">加入购物车</span>
+    </li>
+    <li>
+        <span>华为手机</span>
+        <span class="add">加入购物车</span>
+    </li>
+    <li>
+        <span>魅族手机</span>
+        <span class="add">加入购物车</span>
+    </li>
+    <li>
+        <span>小米手机</span>
+        <span class="add">加入购物车</span>
+    </li>
+</ul>
+
+
+<div class="main">
+    <ol>
+    </ol>
+</div>
+<script>
+    var json={
+        addNodes:$(".add"),
+        removeOlNodes:$("ol"),
+        judge: function (proName) {
+            var mainDiv=$(".main");
+            var olNode=mainDiv.children("ol");
+            var liNodes=olNode.children("li");
+            for(var i=0;i<liNodes.length;i++){
+                var textNode=liNodes[i].firstChild;
+                var textVal=textNode.innerHTML;
+                if(proName==textVal){
+                    return false;
+                }
+            }
+            return true;
+
+        },
+        createLi: function (addPro) {//创建li
+            var mainDiv=$(".main");
+            var olNode=mainDiv.children("ol");
+            var liCreatNodes=document.createElement("li");
+            var spanCreatNode1=document.createElement("span");
+            spanCreatNode1.innerHTML=addPro;
+            liCreatNodes.appendChild(spanCreatNode1);
+            var spanCreatNode2=document.createElement("span");
+            $(liCreatNodes).append($(spanCreatNode2).html(" 删除").addClass("remove")).appendTo(olNode);
+        },
+        setCookie: function (theName,theValue,theTime,thePath) {
+            var nowTime=new Date();//获取当前时间
+            nowTime.setTime(nowTime.getTime()+theTime*1000);//设置过期时间
+            thePath=thePath==null?"/":thePath;//path默认根目录
+            document.cookie=theName+"="+theValue+";expires="+nowTime+";path="+thePath;
+            console.log(document.cookie);
+        },
+        getCookie: function (thename) {
+            var c_start=document.cookie.indexOf(thename);//获取要截取信息的开始位置，如果没有则返回-1
+            if(c_start!=-1){//存在
+                val_start=c_start+thename.length+1;
+                var c_end=document.cookie.indexOf(";",val_start);
+                var val_end;
+                if(c_end==-1){
+                    val_end=document.cookie.length;
+                }else{
+                    val_end=c_end;
+                }
+                return document.cookie.substring(val_start,val_end) ;
+            }
+            return "";
+        },
+        delCookie: function (thename,thePath) {
+            var oldTime=new Date(2000,1,1);
+            thePath=thePath==null?"/":thePath;
+            document.cookie=thename+"=;expires="+oldTime+";path="+thePath;
+            console.log(document.cookie);
+        },
+        addFun: function () {//添加
+            this.addNodes.click(function () {
+                var Pos=$(this).parent().index();//当前位置
+                var addPro=$(this).siblings("span").html();//得到商品属性值
+                if(json.judge(addPro)){
+                    json.createLi(addPro);//添加li
+                    json.setCookie(addPro,Pos,60*60);
+                }
+
+            })
+        },
+        removeFun:function(){//删除
+            this.removeOlNodes.click(function(e){
+                var e=window.event||e;
+                var target= e.target;
+                if(target.className=="remove"){
+                    var removePro=$(target).siblings("span").html();//得到要删除的商品值
+                    $(target).parent().remove();
+                    json.delCookie(removePro);
+                }
+            })
+        },
+        loadFun:function(){
+            var liPros=$("ul li");
+            var proNum=liPros.length;
+              $(function(){
+                  for(var i=0;i<proNum;i++){
+                      var proName=liPros.eq(i).children().first().text();
+                      if(document.cookie.indexOf(proName)!=-1){
+                          json.createLi(proName);
+                      }
+                  }
+              })
+        },
+        init: function () {
+            this.addFun();
+            this.removeFun();
+            this.loadFun();
+        }
+    };
+    json.init();
+    alert(document.cookie);
+</script>
+</body>
+</html>
